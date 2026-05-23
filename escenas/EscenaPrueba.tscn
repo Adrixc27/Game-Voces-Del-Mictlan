@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://ceaksmkvj7um3"]
-
-[ext_resource type="Script" uid="uid://cct5rth5rf0h8" path="res://scripts/HelloWorld.gd" id="1_tpw4k"]
-
-[node name="Node3D" type="Node3D" unique_id=1775845675]
-script = ExtResource("1_tpw4k")
