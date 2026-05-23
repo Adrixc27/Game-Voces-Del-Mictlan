@@ -2,11 +2,15 @@
 extends CharacterBody3D
 const VELOCIDAD = 4.0
 const GRAVEDAD = 9.8
-const SENSIBILIDAD = 0.005
+const SENSIBILIDAD_first = 0.001
+const SENSIBILIDAD_third = 0.002
+const SENSIBILIDAD = 0.003
 @onready var camara = $Camera3D
 var first_person = true
 var inventario: Array = []
 func _ready():
+	# Hace invisible el raton
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	activar_first_person()
 func activar_first_person():
 	camara.position = Vector3(0, 5, 0)
@@ -17,8 +21,8 @@ func activar_third_person():
 	camara.position = Vector3(-1.37, 5.018, 0.708)
 	camara.rotation_degrees.x = -23.5
 	first_person = false
+	#Assing a key for the change of camera
 func _unhandled_input(event):
-    #Boton para interactuar
 	if event is InputEventKey and event.keycode == KEY_E and event.pressed:
 		print("accion presionada")
 		var puerta = get_node_or_null("../StaticBody3D2")
@@ -30,7 +34,6 @@ func _unhandled_input(event):
 					print("Puerta abierta")
 				else:
 					print("Nesecitas una llave")
-                    #Cambio de camara
 	if event is InputEventKey:
 		if event.keycode == KEY_C and event.pressed:
 			if first_person:
@@ -39,17 +42,16 @@ func _unhandled_input(event):
 				activar_first_person()
 	if event is InputEventMouseMotion:
 		if first_person:
-			var nueva_rotacion = rotation.y + (-event.relative.x * SENSIBILIDAD)
-			rotation.y = clamp(nueva_rotacion, -PI/2, PI/2)
-			camara.rotate_x(-event.relative.y * SENSIBILIDAD)
-			camara.rotation.x = clamp(camara.rotation.x, -1.2, 1.2)
+			rotate_y(-event.relative.x * SENSIBILIDAD_first)
+			var nueva_rotation_x = camara.rotation.x + (-event.relative.y * SENSIBILIDAD_first)
+			camara.rotation.x = clamp(nueva_rotation_x, -1.2, 1.2) 
 		else:
-			var nueva_rotation = rotation.y + (-event.relative.x * SENSIBILIDAD)
-			rotation.y = clamp(nueva_rotation, -PI/4, PI/4)
+			var nueva_rotation = rotation.y + (-event.relative.x * SENSIBILIDAD_third)
+			rotation.y = clamp(nueva_rotation, -PI, PI)
 func _physics_process(delta):
 	if not is_on_floor():
 		velocity.y -= GRAVEDAD * delta
-		#Movimiento del jugador 
+		#Movimiento de como mira el jugador
 	var direccion = Vector3.ZERO
 	if Input.is_action_pressed("ui_up"):
 		direccion -= transform.basis.z
@@ -65,12 +67,10 @@ func _physics_process(delta):
 	move_and_slide()
 	if Input.is_action_just_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-        #Recoger objeto 
 func recoger_objeto(nombre: String):
 		inventario.append(nombre)
 		print("recogiste: ", nombre)
 		print("inventario: ", inventario)
-        #Aparece el villano si recoges la llave
 		if nombre == "llave":
 			get_parent().get_node("Personaje Villano").visible = true
 			get_parent().get_node("Personaje Villano").activo = false	
